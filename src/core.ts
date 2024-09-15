@@ -1,5 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import { arikedbpbuff } from "./arikedbpbuff";
+import { Observable } from "rxjs";
 
 export enum Epoch {
     Second = 0,
@@ -269,6 +270,123 @@ export class ArikedbCore {
                 });
             }
         });
+    }
+
+    public getVariables(collection_name: string, variable_names: string[], epoch: Epoch): Promise<Result> {
+        return new Promise((resolve, reject) => {
+            if (this.client === null || this.client === undefined || !this.client) {
+                reject(new Error('Not connected to server'));
+            } else {
+                const request = new arikedbpbuff.GetVariablesRequest({
+                    collection: collection_name,
+                    names: variable_names,
+                    epoch: epoch as unknown as arikedbpbuff.Epoch
+                });
+                this.client.GetVariables(request, (error, response) => {
+                    if (error) {
+                        reject(error);
+                    } else if (!response) {
+                        reject(new Error('No response from server'));
+                    } else {
+                        resolve(new Result(
+                            StatusCode.Ok,
+                            undefined,
+                            undefined,
+                            response.points.map(point => this.dataPoint_from_point(point))
+                        ));
+                    }
+                });
+            }
+        });
+    }
+
+    public setVariables(
+        collection_name: string,
+        variable_names: string[],
+        values: (number | string | boolean)[],
+        timestamp: number = Date.now(),
+        epoch: Epoch = Epoch.Millisecond
+    ): Promise<Result> {
+
+        return new Promise((resolve, reject) => {
+            if (this.client === null || this.client === undefined || !this.client) {
+                reject(new Error('Not connected to server'));
+            } else {
+                const request = new arikedbpbuff.SetVariablesRequest({
+                    collection: collection_name,
+                    names: variable_names,
+                    values: values.map(value => String(value)),
+                    timestamp: String(timestamp),
+                    epoch: epoch as unknown as arikedbpbuff.Epoch
+                });
+                this.client.SetVariables(request, (error, response) => {
+                    if (error) {
+                        reject(error);
+                    } else if (!response) {
+                        reject(new Error('No response from server'));
+                    } else {
+                        resolve(new Result(StatusCode.Ok));
+                    }
+                });
+            }
+        });
+
+    }
+
+    public subscribeVariables(collection_name: string, variable_names: string[], events: VarEvent[]): Observable<DataPoint> {
+        return new Observable<DataPoint>((observer) => {
+            if (this.client === null || this.client === undefined || !this.client) {
+                observer.error(new Error('Not connected to server'));
+                return;
+            }
+            const request = new arikedbpbuff.SubscribeVariablesRequest({
+                collection: collection_name,
+                names: variable_names,
+                events: events.map(event => new arikedbpbuff.VariableEvent({
+                    event: event.event as unknown as arikedbpbuff.Event,
+                    value: String(event.value),
+                    low_limit: String(event.low_limit),
+                    high_limit: String(event.high_limit)
+                }))
+            });
+            const stream = this.client.SubscribeVariables(request);
+    
+            stream.on('data', (point: arikedbpbuff.VarDataPoint) => {
+                const data_point = this.dataPoint_from_point(point);
+                observer.next(data_point);
+            });
+    
+            stream.on('end', () => {
+                observer.complete();
+            });
+    
+            stream.on('error', (error) => {
+                observer.error(error);
+            });
+
+            return () => {
+                stream.cancel();
+            };
+        });
+    }
+
+    private dataPoint_from_point(point: arikedbpbuff.VarDataPoint): DataPoint {
+        const v_type = point.vtype as unknown as VariableType;
+        var value: number | boolean | string = point.value;
+        if (v_type === VariableType.BOOL) {
+            value = point.value.toLowerCase() === 'true' || point.value.toLowerCase() === '1';
+        } else if (v_type  === VariableType.STR) {
+            value = String(value);
+        } else {
+            value = Number(value);
+        }
+        return new DataPoint(
+            point.name,
+            v_type,
+            Number(point.timestamp),
+            point.epoch as unknown as Epoch,
+            value
+        );
     }
 
 }
