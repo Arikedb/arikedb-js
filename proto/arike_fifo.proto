@@ -1,0 +1,76 @@
+syntax = "proto3";
+package arike_pb;
+
+import "arike_utils.proto";
+
+message FifoMeta {
+    string name = 1;
+    ValType val_type = 2;
+    optional uint64 max_size = 3;
+}
+
+message FifoNamesCount {
+    string name = 1;
+    uint32 n = 2;
+}
+
+message FifoValue {
+    string name = 1;
+    optional ValType val_type = 2;
+    repeated int64 int_value = 3;
+    repeated double float_value = 4;
+    repeated string str_value = 5;
+    repeated bool bool_value = 6;
+}
+
+message CreateFifosRequest {
+    string collection = 1;
+    repeated FifoMeta fifos = 2;
+}
+
+message CreateFifosResponse {
+    StatusCode status = 1;
+    repeated string already_exists = 2;
+}
+
+message DeleteFifosRequest {
+    string collection = 1;
+    repeated string names = 2;
+}
+
+message DeleteFifosResponse {
+    StatusCode status = 1;
+    repeated string not_found = 2;
+}
+
+message ListFifosRequest {
+    string collection = 1;
+    optional string pattern = 2;
+}
+
+message ListFifosResponse {
+    StatusCode status = 1;
+    repeated FifoMeta fifos = 2;
+}
+
+message PushFifosRequest {
+    string collection = 1;
+    repeated FifoValue values = 2;
+}
+
+message PushFifosResponse {
+    StatusCode status = 1;
+    repeated string not_found = 2;
+    repeated string invalid_type = 3;
+    repeated uint64 non_inserted = 4;
+}
+
+message PullFifosRequest {
+    string collection = 1;
+    repeated FifoNamesCount names_counts = 2;
+}
+
+message PullFifosResponse {
+    StatusCode status = 1;
+    repeated FifoValue values = 2;
+}

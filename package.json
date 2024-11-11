@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "cd proto && protoc --plugin=protoc-gen-ts=../node_modules/.bin/protoc-gen-ts --ts_out=../src arikedbpbuff.proto && cd .. && tsup",
+    "build": "cd proto && protoc --plugin=protoc-gen-ts=../node_modules/.bin/protoc-gen-ts --ts_out=../src *.proto && cd .. && tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest"
