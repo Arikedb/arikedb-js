@@ -4,6 +4,7 @@
   "description": "Arikedb Client",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
+  "type": "module",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -12,7 +13,8 @@
     "build": "cd proto && protoc --plugin=protoc-gen-ts=../node_modules/.bin/protoc-gen-ts --ts_out=../src *.proto && cd .. && tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "demo-connecting": "ts-node demo/connecting.ts"
   },
   "keywords": [],
   "author": "Alejandro Alfonso",
@@ -29,6 +31,7 @@
     "@types/google-protobuf": "^3.15.12",
     "@types/jest": "^29.5.12",
     "protoc-gen-ts": "^0.8.7",
+    "ts-node": "^10.9.2",
     "tsup": "^8.2.3",
     "typescript": "^5.5.4",
     "vitest": "^2.0.4"

@@ -1,0 +1,13 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "scripts": {
+    "demo-connecting": "node connecting.js"
+  },
+  "keywords": [],
+  "author": "alejandro",
+  "description": "",
+  "dependencies": {
+    "@arikedb/core": "file:.."
+  }
+}

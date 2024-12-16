@@ -1,10 +1,8 @@
-import { arike_pb as utils_pb } from "./arike_utils";
-
 export enum ValueType {
-    Int = 0,
-    Float = 1,
-    String = 2,
-    Bool = 3
+    Int,
+    Float,
+    String,
+    Bool,
 }
 
 export enum Event {

@@ -1,6 +1,6 @@
 {
   "include": ["src"],
-  "exclude": ["**/*.test.ts"],
+  "exclude": ["**/*.test.ts", "demo"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
