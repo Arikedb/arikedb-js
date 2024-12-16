@@ -1,0 +1,38 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+      - master  # Trigger on pushes to the master branch (if applicable)
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18  # Specify your Node.js version
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org/'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the package # Optional if you have a build step
+      run: npm run build
+
+    - name: Publish to npm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npm publish --access public
